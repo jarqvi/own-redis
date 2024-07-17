@@ -1,0 +1,31 @@
+# .golangci.yml
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+    - gofmt
+    - goimports
+    - gocyclo
+    - misspell
+
+run:
+  timeout: 10m
+
+issues:
+  exclude:
+    - "error return value not checked.*"
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters-settings:
+  gofmt:
+    simplify: true
+
+  gocyclo:
+    min-complexity: 10
+
+  misspell:
+    locale: US
