@@ -33,7 +33,7 @@ jobs:
   test:
     runs-on: ubuntu-latest 
 
-    depends-on: lint
+    needs: lint
 
     steps:
       - name: Install make
