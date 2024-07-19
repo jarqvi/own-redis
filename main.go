@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"strings"
 )
 
 var (
@@ -17,20 +16,20 @@ var (
 func main() {
 	flag.Parse()
 
-	err := run()
+	err := server()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() (err error) {
+func server() (err error) {
 	l, err := net.Listen("tcp", *listen)
 	if err != nil {
 		return fmt.Errorf("failed to bind to port %s: %v", *listen, err)
 	}
 
-	defer closeResource(l, &err, "failed to close listener")
+	defer close(l, &err, "failed to close listener")
 
 	log.Printf("server listening on %s", *listen)
 
@@ -43,7 +42,7 @@ func run() (err error) {
 		log.Printf("accepted connection from %s", c.RemoteAddr())
 
 		go func(c net.Conn) {
-			defer closeResource(c, &err, "failed to close connection")
+			defer close(c, &err, "failed to close connection")
 
 			err := cmd(c)
 			if err != nil {
@@ -54,37 +53,29 @@ func run() (err error) {
 }
 
 func cmd(c net.Conn) error {
-	buf := make([]byte, 128)
-
 	for {
-		n, err := c.Read(buf)
+		resp := NewResp(c)
+		value, err := resp.Read()
 		if err != nil {
 			if err == io.EOF {
 				log.Printf("client disconnected: %s", c.RemoteAddr())
 				return nil
 			}
+
 			return fmt.Errorf("failed to read data from connection: %v", err)
 		}
 
-		cmd := strings.TrimSpace(string(buf[:n]))
+		log.Printf("received: %v", value)
 
-		log.Printf("Read command: %s", cmd)
-
-		if strings.ToLower(cmd) == "ping" {
-			_, err = c.Write([]byte("+PONG\r\n"))
-			if err != nil {
-				return fmt.Errorf("failed to write data to connection: %v", err)
-			}
-		} else {
-			_, err = c.Write([]byte("(error) unknown command '" + cmd + "'\r\n"))
-			if err != nil {
-				return fmt.Errorf("failed to write data to connection: %v", err)
-			}
+		writer := NewWriter(c)
+		err = writer.Write(Value{typ: "string", str: "OK"})
+		if err != nil {
+			return fmt.Errorf("failed to write data to connection: %v", err)
 		}
 	}
 }
 
-func closeResource(c io.Closer, errP *error, msg string) {
+func close(c io.Closer, errP *error, msg string) {
 	err := c.Close()
 	if err != nil {
 		*errP = fmt.Errorf("%s: %v", msg, err)
