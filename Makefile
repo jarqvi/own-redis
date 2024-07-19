@@ -2,7 +2,7 @@ APP_NAME = own-redis
 APP_VERSION = 0.1.0
 APP_DESCRIPTION = a simple redis with golang
 
-SOURCE_DIR = $(shell pwd)/.
+SOURCE_DIR = $(shell pwd)/own-redis
 BUILD_DIR = $(shell pwd)/bin
 
 LISTEN ?= 0.0.0.0

@@ -3,8 +3,8 @@ tmp_dir = "bin"
 
 [build]
   args_bin = []
-  bin = "./bin/main"
-  cmd = "go build -o ./bin/main ."
+  bin = "./bin/own-redis"
+  cmd = "go build -o ./bin/own-redis ./own-redis"
   delay = 500
   exclude_dir = ["assets", "bin", "vendor", ".git", ".github", ".vscode"]
   exclude_file = []
