@@ -24,7 +24,7 @@ deps: pre_commands
 
 build: pre_commands deps
 	@printf "===> Building...\n"
-	@go build -o $(BUILD_DIR)/$(APP_NAME) $(SOURCE_DIR)
+	@go build -o $(BUILD_DIR)/main $(SOURCE_DIR)
 	@printf "===> Build complete.\n"
 	@printf "\n"
 
@@ -44,7 +44,7 @@ start: pre_commands build
 	@printf "===> Running app...\n"
 	@sleep 3
 	@clear
-	@$(BUILD_DIR)/$(APP_NAME) -listen $(LISTEN):$(PORT)
+	@$(BUILD_DIR)/main -listen $(LISTEN):$(PORT)
 
 clean: pre_commands
 	@printf "===> Cleaning...\n"
