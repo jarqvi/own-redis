@@ -1,4 +1,4 @@
-package main
+package redis
 
 import (
 	"flag"
@@ -6,24 +6,13 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 )
 
 var (
 	listen = flag.String("listen", ":6379", "address to listen on")
 )
 
-func main() {
-	flag.Parse()
-
-	err := server()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-func server() (err error) {
+func Server() (err error) {
 	l, err := net.Listen("tcp", *listen)
 	if err != nil {
 		return fmt.Errorf("failed to bind to port %s: %v", *listen, err)
