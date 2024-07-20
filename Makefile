@@ -29,7 +29,7 @@ build: pre_commands deps
 	@printf "\n"
 
 test: pre_commands deps
-	@echo "Running tests..."
+	@echo ""===> Running tests..."
 	@sleep 3
 	@clear
 	@go test -v $(SOURCE_DIR)/...
