@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -9,8 +8,6 @@ import (
 )
 
 func main() {
-	flag.Parse()
-
 	err := redis.Server()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)

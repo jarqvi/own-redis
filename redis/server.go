@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 )
 
 var (
@@ -13,6 +14,8 @@ var (
 )
 
 func Server() (err error) {
+	flag.Parse()
+
 	l, err := net.Listen("tcp", *listen)
 	if err != nil {
 		return fmt.Errorf("failed to bind to port %s: %v", *listen, err)
@@ -54,10 +57,42 @@ func cmd(c net.Conn) error {
 			return fmt.Errorf("failed to read data from connection: %v", err)
 		}
 
+		writer := NewWriter(c)
+
+		if value.typ != "array" {
+			err = writer.Write(Value{typ: "error", str: "expected array"})
+			if err != nil {
+				return fmt.Errorf("failed to write data to connection: %v", err)
+			}
+
+			continue
+		}
+
+		if len(value.array) == 0 {
+			err = writer.Write(Value{typ: "error", str: "expected array with at least one element"})
+			if err != nil {
+				return fmt.Errorf("failed to write data to connection: %v", err)
+			}
+
+			continue
+		}
+
 		log.Printf("received: %v", value)
 
-		writer := NewWriter(c)
-		err = writer.Write(Value{typ: "string", str: "OK"})
+		cmd := strings.ToUpper(value.array[0].bulk)
+		args := value.array[1:]
+
+		handler, ok := Handlers[cmd]
+		if !ok {
+			err = writer.Write(Value{typ: "error", str: "unknown command"})
+			if err != nil {
+				return fmt.Errorf("failed to write data to connection: %v", err)
+			}
+
+			continue
+		}
+
+		err = writer.Write(handler(args))
 		if err != nil {
 			return fmt.Errorf("failed to write data to connection: %v", err)
 		}
