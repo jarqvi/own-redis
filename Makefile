@@ -25,7 +25,7 @@ deps: pre_commands
 build: pre_commands deps
 	@printf "===> Building...\n"
 	@go build -o $(BUILD_DIR)/main $(SOURCE_DIR)
-	@printf "===> Build complete.\n"
+	@printf "===> Build completed.\n"
 	@printf "\n"
 
 test: pre_commands deps
@@ -49,19 +49,19 @@ start: pre_commands build
 clean: pre_commands
 	@printf "===> Cleaning...\n"
 	@rm -rf $(BUILD_DIR)
-	@printf "===> Clean complete.\n"
+	@printf "===> Clean completed.\n"
 	@printf "\n"
 
 fmt: pre_commands
 	@printf "===> Formatting...\n"
 	@go fmt $(SOURCE_DIR)/...
-	@printf "===> Format complete.\n"
+	@printf "===> Format completed.\n"
 	@printf "\n"
 
 lint: pre_commands deps fmt
 	@printf "===> Linting...\n"
 	@golangci-lint run $(SOURCE_DIR)/...
-	@printf "===> Lint complete.\n"
+	@printf "===> Lint completed.\n"
 	@printf "\n"
 
 .PHONY: build start test deps clean fmt lint
