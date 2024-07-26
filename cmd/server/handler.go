@@ -1,4 +1,4 @@
-package redis
+package server
 
 var Handlers = map[string]func(args []Value) Value{
 	"PING": ping,
@@ -15,5 +15,15 @@ func info(args []Value) Value {
 }
 
 func echo(args []Value) Value {
-	return Value{typ: "string", str: args[0].bulk}
+	resultStr := ""
+
+	for i, arg := range args {
+		if i > 0 {
+			resultStr += " "
+		}
+
+		resultStr += arg.bulk
+	}
+
+	return Value{typ: "string", str: resultStr}
 }

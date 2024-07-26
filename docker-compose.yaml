@@ -1,0 +1,23 @@
+services:
+  own-redis:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: own-redis:0.1.0
+    container_name: own-redis
+    ports:
+      - 6379:6379
+    environment:
+      DEV_MODE: ${DEV_MODE:-true}
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-6379}
+    networks:
+      - own-redis
+    restart: always
+    volumes:
+      - ./cmd:/app/cmd
+
+networks:
+  own-redis:
+    driver: bridge
+    name: own-redis

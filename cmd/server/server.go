@@ -1,4 +1,4 @@
-package redis
+package server
 
 import (
 	"flag"
@@ -13,7 +13,7 @@ var (
 	listen = flag.String("listen", ":6379", "address to listen on")
 )
 
-func Server() (err error) {
+func Run() (err error) {
 	flag.Parse()
 
 	l, err := net.Listen("tcp", *listen)

@@ -4,7 +4,7 @@ tmp_dir = "bin"
 [build]
   args_bin = []
   bin = "./bin/main"
-  cmd = "go build -o ./bin/main ."
+  cmd = "go build -o ./bin/main ./cmd"
   delay = 500
   exclude_dir = ["assets", "bin", "vendor", ".git", ".github", ".vscode"]
   exclude_file = []

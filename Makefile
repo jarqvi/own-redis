@@ -2,10 +2,10 @@ APP_NAME = own-redis
 APP_VERSION = 0.1.0
 APP_DESCRIPTION = a simple redis with golang
 
-SOURCE_DIR = $(shell pwd)/.
+SOURCE_DIR = $(shell pwd)/cmd
 BUILD_DIR = $(shell pwd)/bin
 
-LISTEN ?= 0.0.0.0
+HOST ?= 0.0.0.0
 PORT ?= 6379
 
 pre_commands:
@@ -38,13 +38,13 @@ dev: pre_commands deps
 	@printf "===> Running app in development mode...\n"
 	@sleep 3
 	@clear
-	@air -c .air.toml
+	@air -c .air.toml -- -listen $(HOST):$(PORT)
 
 start: pre_commands build
 	@printf "===> Running app...\n"
 	@sleep 3
 	@clear
-	@$(BUILD_DIR)/main -listen $(LISTEN):$(PORT)
+	@$(BUILD_DIR)/main -listen $(HOST):$(PORT)
 
 clean: pre_commands
 	@printf "===> Cleaning...\n"
