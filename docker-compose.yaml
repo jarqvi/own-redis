@@ -8,14 +8,16 @@ services:
     ports:
       - 6379:6379
     environment:
-      DEV_MODE: ${DEV_MODE:-true}
+      DEV_MODE: ${DEV_MODE:-false}
       HOST: ${HOST:-0.0.0.0}
       PORT: ${PORT:-6379}
+      AOF: ${AOF:-/data}
     networks:
       - own-redis
     restart: always
     volumes:
       - ./cmd:/app/cmd
+      - ./data:/data
 
 networks:
   own-redis:

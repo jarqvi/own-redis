@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -26,6 +28,33 @@ func Run() (err error) {
 	log.Printf("server listening on %s", *listen)
 
 	for {
+		aofPath := path.Join(os.Getenv("AOF"), "data.aof")
+		if aofPath == "" {
+			aofPath = "/data/data.aof"
+		}
+
+		aof, err := NewAof(aofPath)
+		if err != nil {
+			return fmt.Errorf("failed to open aof file: %v", err)
+		}
+
+		defer aof.Close()
+
+		err = aof.Read(func(value Value) {
+			cmd := strings.ToUpper(value.array[0].bulk)
+			args := value.array[1:]
+
+			handler, ok := Handlers[cmd]
+			if !ok {
+				panic(fmt.Sprintf("unknown command: %s", cmd))
+			}
+
+			handler(args)
+		})
+		if err != nil {
+			return fmt.Errorf("failed to read aof file: %v", err)
+		}
+
 		c, err := l.Accept()
 		if err != nil {
 			return fmt.Errorf("failed to accept connection: %v", err)
@@ -33,18 +62,18 @@ func Run() (err error) {
 
 		log.Printf("accepted connection from %s", c.RemoteAddr())
 
-		go func(c net.Conn) {
+		go func(c net.Conn, aof *Aof) {
 			defer close(c, &err, "failed to close connection")
 
-			err := cmd(c)
+			err := cmd(c, aof)
 			if err != nil {
 				log.Printf("error: %v", err)
 			}
-		}(c)
+		}(c, aof)
 	}
 }
 
-func cmd(c net.Conn) error {
+func cmd(c net.Conn, aof *Aof) error {
 	for {
 		resp := NewResp(c)
 		value, err := resp.Read()
@@ -90,6 +119,13 @@ func cmd(c net.Conn) error {
 			}
 
 			continue
+		}
+
+		if cmd == "SET" || cmd == "HSET" {
+			err = aof.Write(value)
+			if err != nil {
+				return fmt.Errorf("failed to write data to aof file: %v", err)
+			}
 		}
 
 		err = writer.Write(handler(args))
