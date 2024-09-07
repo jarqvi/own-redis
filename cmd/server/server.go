@@ -25,36 +25,45 @@ func Run() (err error) {
 
 	defer close(l, &err, "failed to close listener")
 
+	aofPath := path.Join(os.Getenv("AOF"), "data.aof")
+
+	if _, err := os.Stat(aofPath); os.IsNotExist(err) {
+		err = os.MkdirAll(path.Dir(aofPath), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+	}
+
+	if aofPath == "" {
+		aofPath = "/data/data.aof"
+	}
+
+	aof, err := NewAof(aofPath)
+	if err != nil {
+		return fmt.Errorf("failed to open aof file: %v", err)
+	}
+
+	defer close(aof, &err, "failed to close aof")
+
+	err = aof.Read(func(value Value) {
+		cmd := strings.ToUpper(value.array[0].bulk)
+		args := value.array[1:]
+
+		handler, ok := Handlers[cmd]
+		if !ok {
+			panic(fmt.Sprintf("unknown command: %s", cmd))
+		}
+
+		handler(args)
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to read aof file: %v", err)
+	}
+
 	log.Printf("server listening on %s", *listen)
 
 	for {
-		aofPath := path.Join(os.Getenv("AOF"), "data.aof")
-		if aofPath == "" {
-			aofPath = "/data/data.aof"
-		}
-
-		aof, err := NewAof(aofPath)
-		if err != nil {
-			return fmt.Errorf("failed to open aof file: %v", err)
-		}
-
-		defer aof.Close()
-
-		err = aof.Read(func(value Value) {
-			cmd := strings.ToUpper(value.array[0].bulk)
-			args := value.array[1:]
-
-			handler, ok := Handlers[cmd]
-			if !ok {
-				panic(fmt.Sprintf("unknown command: %s", cmd))
-			}
-
-			handler(args)
-		})
-		if err != nil {
-			return fmt.Errorf("failed to read aof file: %v", err)
-		}
-
 		c, err := l.Accept()
 		if err != nil {
 			return fmt.Errorf("failed to accept connection: %v", err)

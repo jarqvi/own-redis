@@ -3,13 +3,14 @@ package server
 import "sync"
 
 var Handlers = map[string]func(args []Value) Value{
-	"PING": ping,
-	"INFO": info,
-	"ECHO": echo,
-	"SET":  set,
-	"GET":  get,
-	"HSET": hset,
-	"HGET": hget,
+	"PING":    ping,
+	"INFO":    info,
+	"COMMAND": command,
+	"ECHO":    echo,
+	"SET":     set,
+	"GET":     get,
+	"HSET":    hset,
+	"HGET":    hget,
 }
 
 func ping(args []Value) Value {
@@ -17,6 +18,10 @@ func ping(args []Value) Value {
 }
 
 func info(args []Value) Value {
+	return Value{typ: "string", str: "Welcome to Redis!"}
+}
+
+func command(args []Value) Value {
 	return Value{typ: "string", str: "Welcome to Redis!"}
 }
 
